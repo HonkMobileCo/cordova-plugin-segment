@@ -9,6 +9,7 @@ import com.segment.analytics.Properties.Product;
 import com.segment.analytics.StatsSnapshot;
 import com.segment.analytics.Traits;
 import com.segment.analytics.Traits.Address;
+import com.segment.analytics.android.integrations.google.analytics.GoogleAnalyticsIntegration;
 
 import org.apache.cordova.BuildConfig;
 import org.apache.cordova.CallbackContext;
@@ -54,6 +55,7 @@ public class AnalyticsPlugin extends CordovaPlugin {
             ).logLevel(logLevel)
                 .collectDeviceId(true)
                 .trackApplicationLifecycleEvents()
+                .use(GoogleAnalyticsIntegration.FACTORY)
                 .build();
 
             Analytics.setSingletonInstance(analytics);
