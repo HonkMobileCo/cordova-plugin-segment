@@ -9,7 +9,6 @@ import com.segment.analytics.Properties.Product;
 import com.segment.analytics.StatsSnapshot;
 import com.segment.analytics.Traits;
 import com.segment.analytics.Traits.Address;
-import com.segment.analytics.android.integrations.google.analytics.GoogleAnalyticsIntegration;
 
 import org.apache.cordova.BuildConfig;
 import org.apache.cordova.CallbackContext;
@@ -27,47 +26,8 @@ import java.util.Map;
 
 public class AnalyticsPlugin extends CordovaPlugin {
 
-    private static final String TAG = "AnalyticsPlugin";
-    private Analytics analytics;
-    private String writeKey;
-
-    @Override protected void pluginInitialize() {
-        String writeKeyPreferenceName;
-        LogLevel logLevel;
-
-        if(BuildConfig.DEBUG) {
-            writeKeyPreferenceName = "analytics_debug_write_key";
-            logLevel = LogLevel.VERBOSE;
-        } else {
-            writeKeyPreferenceName = "analytics_write_key";
-            logLevel = LogLevel.NONE;
-        }
-
-        writeKey = this.preferences.getString(writeKeyPreferenceName, null);
-
-        if (writeKey == null || "".equals(writeKey)) {
-            analytics = null;
-            Log.e(TAG, "Invalid write key: " + writeKey);
-        } else {
-            analytics = new Analytics.Builder(
-                cordova.getActivity().getApplicationContext(),
-                writeKey
-            ).logLevel(logLevel)
-                .collectDeviceId(true)
-                .trackApplicationLifecycleEvents()
-                .use(GoogleAnalyticsIntegration.FACTORY)
-                .build();
-
-            Analytics.setSingletonInstance(analytics);
-        }
-    }
-
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
-        if (analytics == null) {
-            Log.e(TAG, "Error initializing");
-            return false;
-        }
 
         if ("identify".equals(action)) {
             identify(args);
@@ -99,7 +59,7 @@ public class AnalyticsPlugin extends CordovaPlugin {
     }
 
     private void identify(JSONArray args) {
-        analytics.with(cordova.getActivity().getApplicationContext()).identify(
+        Analytics.with(cordova.getActivity().getApplicationContext()).identify(
             optArgString(args, 0),
             makeTraitsFromJSON(args.optJSONObject(1)),
             null // passing options is deprecated
@@ -107,7 +67,7 @@ public class AnalyticsPlugin extends CordovaPlugin {
     }
 
     private void group(JSONArray args) {
-        analytics.with(cordova.getActivity().getApplicationContext()).group(
+        Analytics.with(cordova.getActivity().getApplicationContext()).group(
                 optArgString(args, 0),
                 makeTraitsFromJSON(args.optJSONObject(1)),
                 null // passing options is deprecated
@@ -115,7 +75,7 @@ public class AnalyticsPlugin extends CordovaPlugin {
     }
 
     private void track(JSONArray args) {
-        analytics.with(cordova.getActivity().getApplicationContext()).track(
+        Analytics.with(cordova.getActivity().getApplicationContext()).track(
                 optArgString(args, 0),
                 makePropertiesFromJSON(args.optJSONObject(1)),
                 null // passing options is deprecated
@@ -123,7 +83,7 @@ public class AnalyticsPlugin extends CordovaPlugin {
     }
 
     private void screen(JSONArray args) {
-        analytics.with(cordova.getActivity().getApplicationContext()).screen(
+        Analytics.with(cordova.getActivity().getApplicationContext()).screen(
                 optArgString(args, 0),
                 optArgString(args, 1),
                 makePropertiesFromJSON(args.optJSONObject(2)),
@@ -132,22 +92,22 @@ public class AnalyticsPlugin extends CordovaPlugin {
     }
 
     private void alias(JSONArray args) {
-        analytics.with(cordova.getActivity().getApplicationContext()).alias(
+        Analytics.with(cordova.getActivity().getApplicationContext()).alias(
                 optArgString(args, 0),
                 null // passing options is deprecated
         );
     }
 
     private void reset() {
-        analytics.with(cordova.getActivity().getApplicationContext()).reset();
+        Analytics.with(cordova.getActivity().getApplicationContext()).reset();
     }
 
     private void flush() {
-        analytics.with(cordova.getActivity().getApplicationContext()).flush();
+        Analytics.with(cordova.getActivity().getApplicationContext()).flush();
     }
 
     private void getSnapshot(CallbackContext callbackContext) {
-        StatsSnapshot snapshot = analytics.with(cordova.getActivity().getApplicationContext()).getSnapshot();
+        StatsSnapshot snapshot = Analytics.with(cordova.getActivity().getApplicationContext()).getSnapshot();
         JSONObject snapshotJSON = new JSONObject();
 
         try {
