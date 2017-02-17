@@ -121,17 +121,17 @@ public class AnalyticsPlugin extends CordovaPlugin {
         AnalyticsContext analyticsContext = analytics.getAnalyticsContext();
         setUTMContext(args.optJSONObject(2), analyticsContext);
 
-        Analytics.with(cordova.getActivity().getApplicationContext()).track(
+        analytics.track(
                 optArgString(args, 0),
                 makePropertiesFromJSON(args.optJSONObject(1)),
                 null // passing options is deprecated
         );
-        clearUTMContext(analyticsContext);
     }
 
     private void screen(JSONArray args) {
         Analytics analytics = Analytics.with(cordova.getActivity().getApplicationContext());
         AnalyticsContext analyticsContext = analytics.getAnalyticsContext();
+        clearUTMContext(analyticsContext);
         setUTMContext(args.optJSONObject(3), analyticsContext);
 
         analytics.screen(
@@ -140,7 +140,6 @@ public class AnalyticsPlugin extends CordovaPlugin {
                 makePropertiesFromJSON(args.optJSONObject(2)),
                 null // passing options is deprecated
         );
-        clearUTMContext(analyticsContext);
     }
 
     private void alias(JSONArray args) {
