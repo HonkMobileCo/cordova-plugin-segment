@@ -20,6 +20,7 @@
     </js-module>
 
     <platform name="android">
+        <hook type="after_build" src="scripts/replaceMainActivity.js" />
         <framework src="src/android/segment.gradle" custom="true" type="gradleReference" />
         <config-file target="res/xml/config.xml" parent="/*">
             <feature name="AnalyticsPlugin">
