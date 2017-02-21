@@ -9,6 +9,8 @@ import com.segment.analytics.Properties.Product;
 import com.segment.analytics.StatsSnapshot;
 import com.segment.analytics.Traits;
 import com.segment.analytics.Traits.Address;
+import com.segment.analytics.AnalyticsContext;
+import com.segment.analytics.AnalyticsContext.Campaign;
 
 import org.apache.cordova.BuildConfig;
 import org.apache.cordova.CallbackContext;
@@ -75,7 +77,11 @@ public class AnalyticsPlugin extends CordovaPlugin {
     }
 
     private void track(JSONArray args) {
-        Analytics.with(cordova.getActivity().getApplicationContext()).track(
+        Analytics analytics = Analytics.with(cordova.getActivity().getApplicationContext());
+        AnalyticsContext analyticsContext = analytics.getAnalyticsContext();
+        setUTMContext(args.optJSONObject(2), analyticsContext);
+
+        analytics.track(
                 optArgString(args, 0),
                 makePropertiesFromJSON(args.optJSONObject(1)),
                 null // passing options is deprecated
@@ -83,7 +89,12 @@ public class AnalyticsPlugin extends CordovaPlugin {
     }
 
     private void screen(JSONArray args) {
-        Analytics.with(cordova.getActivity().getApplicationContext()).screen(
+        Analytics analytics = Analytics.with(cordova.getActivity().getApplicationContext());
+        AnalyticsContext analyticsContext = analytics.getAnalyticsContext();
+        clearUTMContext(analyticsContext);
+        setUTMContext(args.optJSONObject(3), analyticsContext);
+
+        analytics.screen(
                 optArgString(args, 0),
                 optArgString(args, 1),
                 makePropertiesFromJSON(args.optJSONObject(2)),
@@ -214,4 +225,44 @@ public class AnalyticsPlugin extends CordovaPlugin {
     {
         return args.isNull(index) ? null :args.optString(index);
     }
+
+    private static void setUTMContext(JSONObject options, AnalyticsContext analyticsContext) {
+        Campaign currentCampaign = new Campaign();
+        Map<String, Object> json = mapFromJSON(options);
+        if(json != null) {
+            Map<String, Object> contextMap = (Map<String, Object>) json.get("context");
+            if (contextMap != null) {
+                Map<String, Object> campaignMap = (Map<String, Object>) contextMap.get("campaign");
+                if (campaignMap != null) {
+                    String utmName = (String) campaignMap.get("name");
+                    String utmSource = (String) campaignMap.get("source");
+                    String utmMedium = (String) campaignMap.get("medium");
+                    String utmTerm = (String) campaignMap.get("term");
+                    String utmContent = (String) campaignMap.get("content");
+                    if (utmName != null) {
+                        currentCampaign.putName(utmName);
+                    }
+                    if (utmSource != null) {
+                        currentCampaign.putSource(utmSource);
+                    }
+                    if (utmMedium != null) {
+                        currentCampaign.putMedium(utmMedium);
+                    }
+                    if (utmTerm != null) {
+                        currentCampaign.putTerm(utmTerm);
+                    }
+                    if (utmContent != null) {
+                        currentCampaign.putContent(utmContent);
+                    }
+                    analyticsContext.putCampaign(currentCampaign);
+                }
+            }
+        }
+    }
+    private static void clearUTMContext(AnalyticsContext analyticsContext) {
+        Campaign emptyCampaign = new Campaign();
+        analyticsContext.putCampaign(emptyCampaign);
+    }
 }
+
+
