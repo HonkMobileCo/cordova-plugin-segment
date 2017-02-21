@@ -9,7 +9,6 @@ import com.segment.analytics.Properties.Product;
 import com.segment.analytics.StatsSnapshot;
 import com.segment.analytics.Traits;
 import com.segment.analytics.Traits.Address;
-import com.segment.analytics.android.integrations.google.analytics.GoogleAnalyticsIntegration;
 import com.segment.analytics.AnalyticsContext;
 import com.segment.analytics.AnalyticsContext.Campaign;
 
@@ -262,7 +261,7 @@ public class AnalyticsPlugin extends CordovaPlugin {
     }
     private static void clearUTMContext(AnalyticsContext analyticsContext) {
         Campaign emptyCampaign = new Campaign();
-        analyticsContext.clear();
+        analyticsContext.putCampaign(emptyCampaign);
     }
 }
 
