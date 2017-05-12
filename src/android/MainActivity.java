@@ -38,16 +38,22 @@ public class MainActivity extends CordovaActivity
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
-        // added analytics object before creating the acitivity so it can hooked in properly
-        Analytics analytics = new Analytics.Builder(getApplicationContext(), "|SEGMENT_KEY|")
-                .collectDeviceId(true)
-                .trackApplicationLifecycleEvents()
-                .use(GoogleAnalyticsIntegration.FACTORY)
-                .build();
-
-        Analytics.setSingletonInstance(analytics);
-
         super.onCreate(savedInstanceState);
+        try {
+            Analytics analytics = new Analytics.Builder(getApplicationContext(), "|SEGMENT_KEY|")
+                    .collectDeviceId(true)
+                    .trackApplicationLifecycleEvents()
+                    .use(GoogleAnalyticsIntegration.FACTORY)
+                    .build();
+
+            Analytics.setSingletonInstance(analytics);
+        // Pretty hacky, but hitting Android back on home doesn't close the
+        // Analytics properly, so it tries to rebuild and re-set the singleton
+        // again with the same write key, which throws an error
+        } catch (IllegalStateException e) {
+            // no-op
+        }
+
         // Set by <content src="index.html" /> in config.xml
         loadUrl(launchUrl);
     }
